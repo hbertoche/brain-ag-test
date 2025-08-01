@@ -139,8 +139,7 @@ export const ProdutorList: React.FC = () => {
   }, [dispatch]);
 
   const handleEdit = (produtor: Produtor) => {
-    // Navigate to edit form (you can implement this later)
-    console.log('Edit produtor:', produtor);
+    navigate(`/produtor/${produtor.id}/editar`, { state: { produtor } });
   };
 
   const handleDelete = async (id: number) => {
@@ -157,7 +156,7 @@ export const ProdutorList: React.FC = () => {
   };
 
   const handleNewProdutor = () => {
-    navigate('/produtores/novo');
+    navigate('/produtor/novo');
   };
 
   if (loading) {
@@ -263,4 +262,4 @@ export const ProdutorList: React.FC = () => {
       )}
     </ListContainer>
   );
-}; 
+};

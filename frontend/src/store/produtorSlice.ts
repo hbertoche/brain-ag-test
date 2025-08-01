@@ -1,41 +1,7 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { Produtor, CreateProdutorDto, UpdateProdutorDto, DashboardStats } from '../types/produtor';
 
-// Mock data for development
-const mockProdutores: Produtor[] = [
-  {
-    id: 1,
-    cpfCnpj: '12345678901',
-    nomeProdutor: 'João Silva',
-    nomeFazenda: 'Fazenda São João',
-    cidade: 'Campinas',
-    estado: 'SP',
-    areaTotal: 1000,
-    areaAgricultavel: 800,
-    areaVegetacao: 200,
-    safras: ['Safra 2021', 'Safra 2022'],
-    culturas: [
-      { safra: 'Safra 2021', cultura: 'Soja' },
-      { safra: 'Safra 2021', cultura: 'Milho' },
-      { safra: 'Safra 2022', cultura: 'Café' }
-    ]
-  },
-  {
-    id: 2,
-    cpfCnpj: '98765432100',
-    nomeProdutor: 'Maria Santos',
-    nomeFazenda: 'Sítio Boa Vista',
-    cidade: 'Ribeirão Preto',
-    estado: 'SP',
-    areaTotal: 500,
-    areaAgricultavel: 400,
-    areaVegetacao: 100,
-    safras: ['Safra 2022'],
-    culturas: [
-      { safra: 'Safra 2022', cultura: 'Cana-de-açúcar' }
-    ]
-  }
-];
+const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3005';
 
 interface ProdutorState {
   produtores: Produtor[];
@@ -45,90 +11,85 @@ interface ProdutorState {
 }
 
 const initialState: ProdutorState = {
-  produtores: mockProdutores,
+  produtores: [],
   loading: false,
   error: null,
   dashboardStats: null,
 };
 
-// Async thunks for API calls (using mock data for now)
 export const fetchProdutores = createAsyncThunk(
   'produtor/fetchProdutores',
   async () => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockProdutores;
+    const response = await fetch(`${API_URL}/produtor`);
+    if (!response.ok) throw new Error('Erro ao buscar produtores');
+    return await response.json();
   }
 );
 
 export const createProdutor = createAsyncThunk(
   'produtor/createProdutor',
   async (produtor: CreateProdutorDto) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const newProdutor: Produtor = {
-      ...produtor,
-      id: Date.now(), // Mock ID generation
-    };
-    return newProdutor;
+    const response = await fetch(`${API_URL}/produtor`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(produtor),
+    });
+    if (!response.ok) throw new Error('Erro ao criar produtor');
+    return await response.json();
   }
 );
 
 export const updateProdutor = createAsyncThunk(
   'produtor/updateProdutor',
   async ({ id, produtor }: { id: number; produtor: UpdateProdutorDto }) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return { id, ...produtor };
+    const response = await fetch(`${API_URL}/produtor/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(produtor),
+    });
+    if (!response.ok) throw new Error('Erro ao atualizar produtor');
+    return await response.json();
   }
 );
 
 export const deleteProdutor = createAsyncThunk(
   'produtor/deleteProdutor',
   async (id: number) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
+    const response = await fetch(`${API_URL}/produtor/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Erro ao deletar produtor');
     return id;
   }
 );
 
 export const fetchDashboardStats = createAsyncThunk(
   'produtor/fetchDashboardStats',
-  async (produtores: Produtor[]) => {
-    // Calculate dashboard stats from produtores data
+  async (_, { getState }) => {
+    // Optionally, you can fetch stats from backend if available
+    // For now, calculate from current state
+    const state = getState() as { produtor: ProdutorState };
+    const produtores = state.produtor.produtores;
     const totalFazendas = produtores.length;
     const totalHectares = produtores.reduce((sum, p) => sum + p.areaTotal, 0);
-    
-    // Por estado
     const estadoCount = produtores.reduce((acc, p) => {
       acc[p.estado] = (acc[p.estado] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    const porEstado = Object.entries(estadoCount).map(([estado, quantidade]) => ({
-      estado,
-      quantidade
-    }));
-
-    // Por cultura
+    const porEstado = Object.entries(estadoCount).map(([estado, quantidade]) => ({ estado, quantidade }));
     const culturaCount = produtores.reduce((acc, p) => {
       p.culturas.forEach(c => {
         acc[c.cultura] = (acc[c.cultura] || 0) + 1;
       });
       return acc;
     }, {} as Record<string, number>);
-    const porCultura = Object.entries(culturaCount).map(([cultura, quantidade]) => ({
-      cultura,
-      quantidade
-    }));
-
-    // Por uso do solo
+    const porCultura = Object.entries(culturaCount).map(([cultura, quantidade]) => ({ cultura, quantidade }));
     const totalAgricultavel = produtores.reduce((sum, p) => sum + p.areaAgricultavel, 0);
     const totalVegetacao = produtores.reduce((sum, p) => sum + p.areaVegetacao, 0);
     const porUsoSolo = [
       { tipo: 'Área Agricultável', area: totalAgricultavel },
       { tipo: 'Área de Vegetação', area: totalVegetacao }
     ];
-
     return {
       totalFazendas,
       totalHectares,
@@ -149,7 +110,6 @@ const produtorSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch produtores
       .addCase(fetchProdutores.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -162,7 +122,6 @@ const produtorSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Erro ao carregar produtores';
       })
-      // Create produtor
       .addCase(createProdutor.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -175,7 +134,6 @@ const produtorSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Erro ao criar produtor';
       })
-      // Update produtor
       .addCase(updateProdutor.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -191,7 +149,6 @@ const produtorSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Erro ao atualizar produtor';
       })
-      // Delete produtor
       .addCase(deleteProdutor.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -204,7 +161,6 @@ const produtorSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Erro ao deletar produtor';
       })
-      // Dashboard stats
       .addCase(fetchDashboardStats.fulfilled, (state, action) => {
         state.dashboardStats = action.payload;
       });
@@ -212,4 +168,4 @@ const produtorSlice = createSlice({
 });
 
 export const { clearError } = produtorSlice.actions;
-export default produtorSlice.reducer; 
+export default produtorSlice.reducer;

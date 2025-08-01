@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Input } from '../atoms/Input';
 import { Button } from '../atoms/Button';
-import { Produtor, CreateProdutorDto, Cultura } from '../../types/produtor';
+import { Produtor, CreateProdutorDto } from '../../types/produtor';
 
 interface ProdutorFormProps {
   produtor?: Produtor;
