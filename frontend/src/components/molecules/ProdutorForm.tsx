@@ -191,7 +191,7 @@ export const ProdutorForm: React.FC<ProdutorFormProps> = ({
   };
 
   return (
-    <FormContainer onSubmit={handleSubmit}>
+    <FormContainer onSubmit={handleSubmit} data-testid="produtor-form">
       <h2>{produtor ? 'Editar Produtor' : 'Novo Produtor'}</h2>
       
       <Input

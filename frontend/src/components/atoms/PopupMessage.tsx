@@ -21,7 +21,7 @@ interface PopupMessageProps {
 }
 
 export const PopupMessage: React.FC<PopupMessageProps> = ({ type, message }) => (
-  <PopupContainer type={type}>
+  <PopupContainer type={type} role="alert" className={type}>
     {message}
   </PopupContainer>
 );

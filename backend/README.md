@@ -7,47 +7,50 @@ This is the backend API for the Brain Agriculture technical test. It is built wi
 - Validação de CPF ou CNPJ
 - Validação de áreas (agricultável + vegetação <= total)
 - Registro de várias culturas por fazenda
-- Dashboard de estatísticas
-- API RESTful documentada
 
-## Prerequisites
-- Node.js >= 18.x
-- npm >= 9.x
-- MySQL >= 8.x
+# Brain-AG Backend
 
-## Setup
-1. **Clone the repository**
-   ```bash
-   git clone <repo-url>
-   cd brain-ag-test/backend
-   ```
-2. **Install dependencies**
-   ```bash
+Este é o backend do sistema Brain-AG, desenvolvido com NestJS, TypeORM e MySQL.
+
+## Pré-requisitos
+- Node.js (v18+ recomendado)
+- MySQL server
+
+## Instalação
+1. **Instale as dependências:**
+   ```cmd
+   cd backend
    npm install
    ```
-3. **Configure environment variables**
-   Create a `.env` file in the `backend` folder:
-   ```env
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_USER=root
-   DB_PASS=root
-   DB_NAME=brain_ag
-   ```
-   Make sure the MySQL database exists and credentials match.
-4. **Run database migrations (if needed)**
-   > For development, `synchronize: true` is enabled. For production, use migrations.
-5. **Start the server**
-   ```bash
+2. **Configure as variáveis de ambiente:**
+   - Copie `.env.example` para `.env` e preencha com suas configurações do MySQL e URL do frontend:
+     ```cmd
+     copy .env.example .env
+     ```
+   - Edite o arquivo `.env` com suas credenciais do MySQL e URL do frontend.
+3. **Crie o banco de dados:**
+   - Use o arquivo SQL fornecido ou execute as migrations se disponível.
+4. **Inicie o servidor backend:**
+   ```cmd
    npm run start:dev
    ```
-   The API will be available at `http://localhost:3000`.
+   A API estará disponível em `http://localhost:3005` por padrão.
 
-## API Documentation
-- Swagger UI: [http://localhost:3000/api](http://localhost:3000/api) (if enabled)
+## Comandos Úteis
+- `npm run start:dev` — Inicia o servidor de desenvolvimento
+- `npm run build` — Gera build de produção
+- `npm run lint` — Executa o lint
 
+## Documentação da API
+- Endpoints principais: `/produtor` (CRUD)
+- CORS restrito à URL do frontend definida em `.env`
+
+## Solução de Problemas
+- Certifique-se de que o MySQL está rodando e as credenciais estão corretas em `.env`
+- Se houver erros de dependência, execute `npm install` na pasta `backend`
+
+---
 ## Testing
-```bash
 npm run test
 npm run test:e2e
 ```
@@ -56,10 +59,5 @@ npm run test:e2e
 - `src/produtor/` - Main feature module (entity, service, controller, repository)
 - `src/app.module.ts` - Main application module
 
-## Useful Commands
-- `npm run start:dev` - Start in development mode
 - `npm run test` - Run unit tests
 - `npm run test:e2e` - Run end-to-end tests
-
-## License
-MIT
